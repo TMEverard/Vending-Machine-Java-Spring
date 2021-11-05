@@ -41,9 +41,14 @@ public class VendingServiceLayerImpl implements VendingServiceLayer{
     };
 
     @Override
-    public void updateStock(String name, Item item) throws VendingPersistenceException {
+    public void updateStock(String name, Item item) throws VendingPersistenceException, OutOfStockException {
+        if (item.getNumberOf() != 0) {
             dao.updateStock(name, item);
-            //Pass through
+            auditDao.writeAuditEntry(
+                    "Purchase: " + item.getName() + " Purchased. New stock level: " + item.getNumberOf());
+        } else {
+            throw new OutOfStockException("That item is out of stock!");
+        }
     };
     private void validateData(Item item) throws
             VendingDataValidationException{
